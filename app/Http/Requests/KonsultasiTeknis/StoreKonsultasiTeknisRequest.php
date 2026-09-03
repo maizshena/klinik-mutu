@@ -14,6 +14,8 @@ class StoreKonsultasiTeknisRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'profile_id' => ['required', 'exists:pelaku_usaha_profiles,id'],
+            'master_pelaku_id' => ['nullable', 'exists:master_pelaku_usaha,id'],
             'origin_wilayah_id' => ['required', 'exists:wilayah,id'],
             'kategori' => ['required', 'string', 'max:100'],
             'judul' => ['required', 'string', 'max:255'],

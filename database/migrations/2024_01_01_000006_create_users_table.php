@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('role_id')->nullable();
             $table->string('whatsapp', 50);
             $table->string('password_hash', 255);
-            $table->string('role', 50)->default('pelaku usaha');
+            $table->string('role', 50)->default('pelaku_usaha');
             $table->enum('account_status', [
                 'aktif', 'menunggu_verifikasi', 'perlu_perbaikan', 'ditolak', 'nonaktif',
             ])->default('aktif');

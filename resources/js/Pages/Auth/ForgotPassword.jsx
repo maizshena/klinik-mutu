@@ -1,55 +1,26 @@
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link } from "@inertiajs/react";
+import { KeyRound } from "lucide-react";
+import GuestLayout from "@/Layouts/GuestLayout";
+import Card from "@/Components/UI/Card";
+import Button from "@/Components/UI/Button";
 
-export default function ForgotPassword({ status }) {
-    const { data, setData, post, processing, errors } = useForm({
-        email: '',
-    });
-
-    const submit = (e) => {
-        e.preventDefault();
-
-        post(route('password.email'));
-    };
-
-    return (
-        <GuestLayout>
-            <Head title="Forgot Password" />
-
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
-
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
-
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
-
-                <InputError message={errors.email} className="mt-2" />
-
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
-    );
+export default function ForgotPassword() {
+  return (
+    <GuestLayout>
+      <Head title="Lupa Password" />
+      <Card className="text-center py-10">
+        <div className="mx-auto h-12 w-12 rounded-2xl bg-brand-secondary/10 flex items-center justify-center mb-4">
+          <KeyRound className="h-5 w-5 text-brand-primary" />
+        </div>
+        <h1 className="text-lg font-semibold text-brand-dark">Fitur Segera Hadir</h1>
+        <p className="text-sm text-brand-text/60 mt-2 max-w-sm mx-auto">
+          Reset password mandiri sedang dalam pengembangan. Sementara itu, hubungi admin
+          melalui WhatsApp untuk bantuan reset password.
+        </p>
+        <Link href={route("login")}>
+          <Button variant="secondary" className="mt-6">Kembali ke Login</Button>
+        </Link>
+      </Card>
+    </GuestLayout>
+  );
 }

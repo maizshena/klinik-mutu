@@ -10,11 +10,13 @@ class KonsultasiTeknisPolicy
 {
     public function before(User $user, string $ability): ?bool
     {
-        return $user->role === UserRoleType::ADMIN->value ? true : null;
+        return $user->role === UserRoleType::SUPER_ADMIN->value ? true : null;
     }
 
     public function viewAny(User $user): bool
     {
+        // Filter aktual (by user_id atau by wilayah) dilakukan di Controller
+        // via trait ScopesByWilayah — policy ini hanya gerbang akses fitur.
         return true;
     }
 
@@ -26,8 +28,20 @@ class KonsultasiTeknisPolicy
 
         $role = UserRoleType::tryFrom($user->role);
 
-        return $role?->isPembina()
-            && $konsultasi->assigned_pembina_id === $user->id;
+        if (! $role) {
+            return false;
+        }
+
+        // admin_pusat & pembina_pusat: akses nasional.
+        if (! $role->isScopedByWilayah()) {
+            return $role->isAdmin() || $role->isPembina();
+        }
+
+        // admin_provinsi / admin_kabupaten / pembina_daerah: wajib match wilayah asal konsultasi.
+        $wilayahDikuasai = $user->wilayah->pluck('id');
+
+        return $konsultasi->assigned_pembina_id === $user->id
+            || $wilayahDikuasai->contains($konsultasi->origin_wilayah_id);
     }
 
     public function create(User $user): bool

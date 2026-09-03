@@ -11,36 +11,25 @@ export default {
     extend: {
       colors: {
         brand: {
-          50: "#eff6ff",
-          100: "#dbeafe",
-          200: "#bfdbfe",
-          300: "#93c5fd",
-          400: "#60a5fa",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
-          800: "#1e40af",
-          900: "#1e3a8a",
+          bg: "#FAFBFC",
+          dark: "#16425B",
+          primary: "#2F6690",
+          secondary: "#3A7CA5",
+          text: "#293241",
         },
       },
       fontFamily: {
-        sans: [
-          "Inter",
-          "ui-sans-serif",
-          "system-ui",
-          "-apple-system",
-          "Segoe UI",
-          "Roboto",
-          "sans-serif",
-        ],
+        sans: ["Geist", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
+      // borderless cards rely entirely on these very soft shadows for separation
       boxShadow: {
-        soft: "0 1px 2px 0 rgba(15, 23, 42, 0.04), 0 1px 3px 0 rgba(15, 23, 42, 0.06)",
-        card: "0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.06)",
-        popover: "0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 10px 24px -3px rgba(15, 23, 42, 0.08)",
+        xs: "0 1px 2px 0 rgba(22, 66, 91, 0.04)",
+        card: "0 1px 3px 0 rgba(22, 66, 91, 0.05), 0 1px 2px -1px rgba(22, 66, 91, 0.04)",
+        pop: "0 4px 12px -2px rgba(22, 66, 91, 0.08)",
       },
       borderRadius: {
-        xl2: "1rem",
+        xl: "0.875rem",
+        "2xl": "1.25rem",
       },
     },
   },

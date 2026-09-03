@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Guardrail: "Dilarang menyimpan dokumen sensitif di folder publik."
+        // Disk ini di luar public/ dan hanya bisa diakses lewat controller (bukan URL langsung).
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private-uploads'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

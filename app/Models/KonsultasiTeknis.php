@@ -33,6 +33,19 @@ class KonsultasiTeknis extends Model
         return $this->belongsTo(User::class, 'assigned_pembina_id');
     }
 
+    /**
+     * Guardrail sistem: setiap konsultasi wajib terhubung ke profil pelaku usaha.
+     */
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(PelakuUsahaProfile::class, 'profile_id');
+    }
+
+    public function masterPelaku(): BelongsTo
+    {
+        return $this->belongsTo(MasterPelakuUsaha::class, 'master_pelaku_id');
+    }
+
     public function interactions(): HasMany
     {
         return $this->hasMany(KonsultasiTeknisInteraction::class, 'konsultasi_id');

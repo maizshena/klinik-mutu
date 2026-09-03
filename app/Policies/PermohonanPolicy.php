@@ -8,18 +8,13 @@ use App\Models\User;
 
 class PermohonanPolicy
 {
-    /**
-     * Admin selalu boleh, jadi tidak perlu diulang di tiap method.
-     */
     public function before(User $user, string $ability): ?bool
     {
-        return $user->role === UserRoleType::ADMIN->value ? true : null;
+        return $user->role === UserRoleType::SUPER_ADMIN->value ? true : null;
     }
 
     public function viewAny(User $user): bool
     {
-        // Pelaku usaha hanya melihat miliknya sendiri (difilter di controller),
-        // pembina melihat sesuai wilayah tugasnya.
         return true;
     }
 
@@ -31,22 +26,27 @@ class PermohonanPolicy
 
         $role = UserRoleType::tryFrom($user->role);
 
-        if ($role?->isPembina()) {
-            return $permohonan->assigned_pembina_id === $user->id
-                || $user->wilayah->pluck('id')->contains($permohonan->handling_wilayah_id);
+        if (! $role) {
+            return false;
         }
 
-        return false;
+        if (! $role->isScopedByWilayah()) {
+            return $role->isAdmin() || $role->isPembina();
+        }
+
+        $wilayahDikuasai = $user->wilayah->pluck('id');
+
+        return $permohonan->assigned_pembina_id === $user->id
+            || $wilayahDikuasai->contains($permohonan->handling_wilayah_id);
     }
 
     public function create(User $user): bool
     {
-        return $user->role === UserRoleType::PELAKU_USAHA->value;
+        return UserRoleType::tryFrom($user->role) === UserRoleType::PELAKU_USAHA;
     }
 
     public function update(User $user, Permohonan $permohonan): bool
     {
-        // Pemohon hanya boleh edit selagi belum diproses pembina.
         if ($permohonan->user_id === $user->id) {
             return $permohonan->status === 'pending';
         }
@@ -61,8 +61,6 @@ class PermohonanPolicy
 
     public function assign(User $user, Permohonan $permohonan): bool
     {
-        $role = UserRoleType::tryFrom($user->role);
-
-        return $role?->isPembina() ?? false;
+        return UserRoleType::tryFrom($user->role)?->isPembina() ?? false;
     }
 }

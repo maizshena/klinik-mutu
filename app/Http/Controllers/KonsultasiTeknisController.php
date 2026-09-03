@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRoleType;
+use App\Http\Controllers\Concerns\ScopesByWilayah;
 use App\Http\Requests\KonsultasiTeknis\JawabKonsultasiTeknisRequest;
 use App\Http\Requests\KonsultasiTeknis\StoreKonsultasiTeknisRequest;
 use App\Http\Requests\KonsultasiTeknis\UpdateKonsultasiTeknisRequest;
@@ -9,29 +11,31 @@ use App\Models\KonsultasiTeknis;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class KonsultasiTeknisController extends Controller
 {
+    use ScopesByWilayah;
+
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', KonsultasiTeknis::class);
 
         $user = $request->user();
+        $role = UserRoleType::tryFrom($user->role);
 
-        $konsultasi = KonsultasiTeknis::query()
-            ->with(['originWilayah:id,nama_wilayah', 'assignedPembina:id,nama_lengkap'])
-            ->when(
-                $user->role === 'pelaku usaha',
-                fn ($query) => $query->where('created_by', $user->id)
-            )
-            ->when(
-                $user->role !== 'pelaku usaha' && $user->role !== 'admin',
-                fn ($query) => $query->where('assigned_pembina_id', $user->id)
-            )
+        $query = KonsultasiTeknis::query()
+            ->with(['originWilayah:id,nama_wilayah', 'assignedPembina:id,nama_lengkap']);
+
+        if ($role === UserRoleType::PELAKU_USAHA) {
+            $query->where('created_by', $user->id);
+        } else {
+            $query = $this->applyWilayahScope($query, $user, 'origin_wilayah_id');
+        }
+
+        $konsultasi = $query
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->latest()
             ->paginate(15)
@@ -99,6 +103,7 @@ class KonsultasiTeknisController extends Controller
 
         $konsultasiTeknis->load([
             'originWilayah', 'assignedPembina', 'attachments', 'interactions', 'history',
+            'profile', 'masterPelaku',
         ]);
 
         return Inertia::render('KonsultasiTeknis/Show', [
@@ -123,9 +128,6 @@ class KonsultasiTeknisController extends Controller
             ->with('success', 'Konsultasi berhasil dihapus.');
     }
 
-    /**
-     * Pembina memberikan jawaban teknis atas konsultasi.
-     */
     public function jawab(JawabKonsultasiTeknisRequest $request, KonsultasiTeknis $konsultasiTeknis): RedirectResponse
     {
         DB::transaction(function () use ($request, $konsultasiTeknis) {
